@@ -1,0 +1,37 @@
+Step 1 
+Connect to Softlayer VPN
+Login to IBM Cloud ibmcloud login --sso
+
+Step 2 
+Select the cluster 
+Syntax - ibmcloud ks cluster config --cluster <cluster_ID>
+example - ibmcloud ks cluster config --cluster c48dgegd097d15r9n6pg
+
+Step 3
+Login to the mysql pod
+kubectl exec -it -n <namespace> <pod_name> -- bash
+kubectl exec -it -n nodejs mysql-0 -- bash
+
+Step 4
+Login to mysql 
+syntax - mysql -u <username> -p
+example - mysql -u root -p
+
+enter password - geet8Rupohsohfoo6neiheinae8aTeed
+
+Step 5 
+Select Database
+Syntax - use <databasename>
+use imireact;
+
+Show tables on database --- show table;
+
+
+select * from geo_account;
+select * from approver_geography;
+select * from approver_roleaccounts;
+
+insert into geo_account (Geo_id,Account_id) values (1,1);
+
+insert into type (typename) values ( "CISCO ACI");
+
