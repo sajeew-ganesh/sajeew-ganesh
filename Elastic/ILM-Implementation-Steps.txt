@@ -1,0 +1,144 @@
+## Create ILM Policy for rollover , hot, warm and delete phases
+
+PUT  /_ilm/policy/mcmsnet-ilm-7-7-120
+{
+    "policy" : {
+      "phases" : {
+       "hot" : {
+          "min_age" : "0ms",
+          "actions" : {
+            "rollover": {
+              "max_age": "7d"
+            }, 
+            "set_priority" : {
+              "priority" : 100
+            }
+          }
+        },
+        "warm" : {
+          "min_age" : "7d",
+          "actions" : {
+            "set_priority" : {
+              "priority" : 50
+            }
+          }
+        },
+        "delete" : {
+          "min_age" : "120d",
+          "actions" : {
+            "delete" : { 
+              "delete_searchable_snapshot" : true
+            }
+          }
+        }
+      }
+   }
+}
+
+
+GET _ilm/policy/mcmsnet-ilm-7-7-120
+
+
+## Create template to attach ILM and rollover alias to the newly created index
+
+PUT _template/mcmsnet-template-7-7-120
+{
+    "index_patterns" : ["mcmsnet-ext-kpistatus*"],
+        "settings": {
+            "index": {
+            "lifecycle": {
+                "name" : "mcmsnet-ilm-7-7-120",
+                "rollover_alias": "mcmsnet-ext-kpistatus"
+            }
+            }
+      }
+}
+
+
+GET _template/mcmsnet-template-7-7-120
+
+
+## Create new Index
+PUT mcmsnet-ext-kpistatus-1
+
+## Verify if the mappings and settings has been applied from templates
+
+GET mcmsnet-ext-kpistatus-1/_settings
+GET mcmsnet-ext-kpistatus-1/_mapping
+
+## Copy data from source to destination Index
+
+POST _reindex?slices=2&refresh
+{
+  "source": {
+    "index": "mcmsnet-ext-kpistatus"
+  },
+  "dest": {
+    "index": "mcmsnet-ext-kpistatus-1"
+  }
+}
+
+## Check if the re-index task is running 
+GET _tasks?detailed=true&actions=*reindex
+
+
+GET mcmsnet-ext-kpistatus/_count
+GET mcmsnet-ext-kpistatus-1/_count
+
+## Stop ingestion
+
+
+## Check how many docs needs to be copied from last 25 hours
+GET mcmsnet-ext-kpistatus/_search?rest_total_hits_as_int
+{
+    "query": {
+      "range": {
+        "DateTime": {
+		  "gte":"now-25h"
+        }
+      }
+   }
+}
+
+## Copy last 25 hours of datat
+
+POST _reindex?slices=2&refresh
+{
+  "source": {
+    "index": "mcmsnet-ext-kpistatus",
+	"query": {
+      "range": {
+        "DateTime": {
+		  "gte":"now-25h"
+        }
+      }
+    }
+  },
+  "dest": {
+    "index": "mcmsnet-ext-kpistatus-1"
+  }
+}
+
+
+GET _tasks?detailed=true&actions=*reindex
+
+GET mcmsnet-ext-kpistatus/_count
+GET mcmsnet-ext-kpistatus-1/_count
+
+GET _cat/indices/mcmsnet-ext-kpistatus*?v
+
+## Verify if the doc count is same then delete the original index
+
+#DELETE mcmsnet-ext-kpistatus
+
+## Add alias to the index
+
+POST /_aliases
+{
+    "actions" : [
+        { "add" : { "index" : "mcmsnet-ext-kpistatus-1", "alias" : "mcmsnet-ext-kpistatus" } }
+    ]
+}
+
+#### Start Ingestion
+
