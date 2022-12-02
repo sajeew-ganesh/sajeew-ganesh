@@ -1,0 +1,2 @@
+kubectl drain <node name>   # --ignore-daemonsets --delete-local-data --force
+kubectl uncordon <node name>

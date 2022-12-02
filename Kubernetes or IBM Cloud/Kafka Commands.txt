@@ -1,0 +1,59 @@
+list topic:
+
+
+
+kafka-topics --list --bootstrap-server cns-dal-kafka:9092
+
+
+
+Create topic:
+kafka-topics --create -topic TEST_TOPIC3 --bootstrap-server cns-dal-kafka:9092 -replication-factor 2 -partitions 3 --config retention.ms=604800000
+
+
+
+Describe topic:
+kafka-topics --describe --bootstrap-server cns-dal-kafka:9092 --topic TEST_TOPIC
+
+
+
+Delete topic
+kafka-topics --zookeeper localhost:2181 --delete --topic TEST_TOPIC
+
+
+
+
+Produce messages to topic:
+kafka-console-producer --broker-list cns-dal-kafka:9092 --topic TEST_TOPIC3
+
+
+
+Consume messages from topic:
+Kafka-console-consumer --bootstrap-server cns-dal-kafka:9092 --topic TEST_TOPIC3
+Consume messages from topic from beginning:
+Kafka-console-consumer --bootstrap-server cns-dal-kafka:9092 --topic TEST_TOPIC3 --from-beginning --max-messages 10
+
+
+
+
+cns-dal-kafka.cns-pre-prod.svc.cluster.local:9092
+
+
+
+Pyspark:
+======
+def Read_DT_TS_Input(kafka_ip_port,kafka_topic,agg_kafka_group_id,agg_kafka_checkpoint):
+    df = spark2.readStream \
+        .format("kafka") \
+        .option("kafka.bootstrap.servers",kafka_ip_port) \
+        .option("subscribe",kafka_topic) \
+        .option("failOnDataLoss", "false") \
+        .option("kafka.group.id", agg_kafka_group_id) \
+        .load() \
+        .selectExpr("CAST(value AS STRING)") \
+        .writeStream \
+        .trigger(processingTime='30 seconds') \
+        .option("checkpointLocation", agg_kafka_checkpoint) \
+        .foreachBatch(process_DT_TS_Input) \
+        .outputMode("append") \
+        .start()
+    df.awaitTermination()
