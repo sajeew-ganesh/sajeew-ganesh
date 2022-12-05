@@ -1,0 +1,125 @@
+kind: CronJob
+apiVersion: batch/v1beta1
+metadata:
+  name: mcms-cns-slack-alert-cron
+  namespace: mcms-cns-analytics
+  uid: 4344f725-5d55-4e5b-bccb-6f5a94f53c1e
+  resourceVersion: '157897001'
+  creationTimestamp: '2021-09-30T01:35:53Z'
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: >
+      {"apiVersion":"batch/v1beta1","kind":"CronJob","metadata":{"annotations":{},"name":"mcms-cns-slack-alert-cron","namespace":"mcms-cns-analytics"},"spec":{"jobTemplate":{"spec":{"template":{"spec":{"containers":[{"args":["-c","python
+      /spark-file-storage/CNS-Solarwinds-Executors/slack_alert.py"],"command":["/bin/bash"],"image":"us.icr.io/mcms-cns/ntw-python-service:v1.1","imagePullPolicy":"Always","name":"mcms-cns-slack-alert-cron","volumeMounts":[{"mountPath":"/spark-file-storage","name":"spark-file-storage"}]}],"imagePullSecrets":[{"name":"mcms-cns-prod-us-icr-io"}],"nodeSelector":{"ibm-cloud.kubernetes.io/worker-pool-name":"worker-pool-03"},"restartPolicy":"OnFailure","volumes":[{"name":"spark-file-storage","persistentVolumeClaim":{"claimName":"mcms-cns-prod-pvc"}}]}}}},"schedule":"*/15
+      * * * *"}}
+  managedFields:
+    - manager: kubectl-client-side-apply
+      operation: Update
+      apiVersion: batch/v1beta1
+      time: '2021-09-30T01:35:53Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:annotations:
+            .: {}
+            f:kubectl.kubernetes.io/last-applied-configuration: {}
+        f:spec:
+          f:concurrencyPolicy: {}
+          f:failedJobsHistoryLimit: {}
+          f:jobTemplate:
+            f:spec:
+              f:template:
+                f:spec:
+                  f:containers:
+                    k:{"name":"mcms-cns-slack-alert-cron"}:
+                      .: {}
+                      f:args: {}
+                      f:command: {}
+                      f:image: {}
+                      f:imagePullPolicy: {}
+                      f:name: {}
+                      f:resources: {}
+                      f:terminationMessagePath: {}
+                      f:terminationMessagePolicy: {}
+                      f:volumeMounts:
+                        .: {}
+                        k:{"mountPath":"/spark-file-storage"}:
+                          .: {}
+                          f:mountPath: {}
+                          f:name: {}
+                  f:dnsPolicy: {}
+                  f:imagePullSecrets:
+                    .: {}
+                    k:{"name":"mcms-cns-prod-us-icr-io"}: {}
+                  f:nodeSelector: {}
+                  f:restartPolicy: {}
+                  f:schedulerName: {}
+                  f:securityContext: {}
+                  f:terminationGracePeriodSeconds: {}
+                  f:volumes:
+                    .: {}
+                    k:{"name":"spark-file-storage"}:
+                      .: {}
+                      f:name: {}
+                      f:persistentVolumeClaim:
+                        .: {}
+                        f:claimName: {}
+          f:schedule: {}
+          f:successfulJobsHistoryLimit: {}
+          f:suspend: {}
+    - manager: kube-controller-manager
+      operation: Update
+      apiVersion: batch/v1
+      time: '2022-12-05T07:45:00Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:status:
+          f:lastScheduleTime: {}
+          f:lastSuccessfulTime: {}
+      subresource: status
+spec:
+  schedule: '*/15 * * * *'
+  concurrencyPolicy: Allow
+  suspend: false
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          volumes:
+            - name: spark-file-storage
+              persistentVolumeClaim:
+                claimName: mcms-cns-prod-pvc
+          containers:
+            - name: mcms-cns-slack-alert-cron
+              image: us.icr.io/mcms-cns/ntw-python-service:v1.1
+              command:
+                - /bin/bash
+              args:
+                - '-c'
+                - >-
+                  python
+                  /spark-file-storage/CNS-Solarwinds-Executors/slack_alert.py
+              resources: {}
+              volumeMounts:
+                - name: spark-file-storage
+                  mountPath: /spark-file-storage
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: OnFailure
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          nodeSelector:
+            ibm-cloud.kubernetes.io/worker-pool-name: worker-pool-03
+          securityContext: {}
+          imagePullSecrets:
+            - name: mcms-cns-prod-us-icr-io
+          schedulerName: default-scheduler
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+status:
+  lastScheduleTime: '2022-12-05T07:45:00Z'
+  lastSuccessfulTime: '2022-12-05T07:45:43Z'
